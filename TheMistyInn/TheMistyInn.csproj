@@ -43,12 +43,21 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="TickerQ" Version="2.4.4" />
+    <PackageReference Include="TickerQ.Dashboard" Version="2.4.4" />
+    <PackageReference Include="TickerQ.EntityFrameworkCore" Version="2.4.4" />
+    <PackageReference Include="TickerQ.Utilities" Version="2.4.4" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="Config\config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Commands\SlashCommands\" />
+    <Folder Include="Commands\PrefixCommands\" />
   </ItemGroup>
 
 </Project>

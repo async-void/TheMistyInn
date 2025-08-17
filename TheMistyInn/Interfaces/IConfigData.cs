@@ -11,5 +11,6 @@ namespace TheMistyInn.Interfaces
     public interface IConfigData
     {
         Task<Result<string, SystemError<ConfigurationDataServiceProvider>>> GetBotTokenAsync();
+        Task<Result<string, SystemError<ConfigurationDataServiceProvider>>> GetConnectionStringAsync();
     }
 }

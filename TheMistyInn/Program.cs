@@ -3,15 +3,21 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Reflection;
+using TheMistyInn.Data;
+using TheMistyInn.EventHandlers;
+using TheMistyInn.Factories;
 using TheMistyInn.Interfaces;
 using TheMistyInn.Services;
 using TheMistyInn.Services.Configuration;
+using TickerQ.Dashboard.DependencyInjection;
+using TickerQ.DependencyInjection;
 
 namespace TheMistyInn
 {
@@ -21,6 +27,8 @@ namespace TheMistyInn
         {
             var configService = new ConfigurationDataServiceProvider();
             var token = await configService.GetBotTokenAsync();
+            var conStr = await configService.GetConnectionStringAsync();
+
             if (!token.IsOk)
             {
                 Console.WriteLine($"Error fetching bot token");
@@ -49,10 +57,29 @@ namespace TheMistyInn
                         {
                             config.AddCommands(Assembly.GetExecutingAssembly());
                         });
+                    services.AddSingleton<DiscordClient>(sp => sp.GetRequiredService<DiscordClient>());
                     services.AddLogging(logging => logging.ClearProviders().AddSerilog(logger));
                     services.AddScoped<IConfigData, ConfigurationDataServiceProvider>();
+                    services.AddDbContextFactory<AppDbContext>(options =>
+                    {
+                        options.UseNpgsql(conStr.Value);
+                        options.EnableSensitiveDataLogging();
+                    });
+
+                    #region EVENT HANDLERS
+                    services.ConfigureEventHandlers((context) =>
+                    {
+                        context.AddEventHandlers<InteractionHandler>(ServiceLifetime.Singleton);
+                        context.HandleGuildCreated(async (sender, args) =>
+                        {
+                            
+                        });
+                    });
+                    #endregion
                 })
                 .RunConsoleAsync();
+
+            await Log.CloseAndFlushAsync();
             #endregion
         }
     }

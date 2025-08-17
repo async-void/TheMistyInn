@@ -30,5 +30,24 @@ namespace TheMistyInn.Services.Configuration
             }
             return Result<string, SystemError<ConfigurationDataServiceProvider>>.Ok(json.Token);
         }
+
+        public async Task<Result<string, SystemError<ConfigurationDataServiceProvider>>> GetConnectionStringAsync()
+        {
+            var path = Path.Combine(AppContext.BaseDirectory, "Config", "config.json");
+            var file = await File.ReadAllTextAsync(path);
+            var json = JsonSerializer.Deserialize<ConfigJson>(file);
+            if (json is null)
+            {
+                return Result<string, SystemError<ConfigurationDataServiceProvider>>.Err(
+                    new SystemError<ConfigurationDataServiceProvider>
+                    {
+                        ErrorCode = Guid.NewGuid(),
+                        ErrorMessage = "Configuration file is not valid.",
+                        ErrorType = Enums.ErrorType.WARNING,
+                        CreatedBy = this,
+                    });
+            }
+            return Result<string, SystemError<ConfigurationDataServiceProvider>>.Ok(json.ConnectionString!);
+        }
     }
 }
